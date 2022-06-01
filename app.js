@@ -31,6 +31,13 @@ app.get("/", async function (req, res) {
   });
 });
 
+app.get("/posts/:id", async function (req, res) {
+  const post = await Post.findById(req.params.id);
+  res.render("post", {
+    post
+  })
+});
+
 app.get("/index.html", async function (req, res) {
   const posts = await Post.find({}); 
   res.render("index", {
