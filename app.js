@@ -1,8 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
+const methodOverride = require('method-override');
 const ejs = require("ejs");
 const Post = require("./models/Post");
+
 
 
 const app = express();
@@ -21,6 +23,9 @@ app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(methodOverride('_method', {
+  methods: ["POST", "GET"]
+}));
 
 // ROUTES
 
@@ -63,6 +68,28 @@ app.get("/post.html", function (req, res) {
 app.post("/posts", async (req,res) => {
   await Post.create(req.body);
   res.redirect('/add_post.html');
+})
+
+app.get("/posts/edit/:id", async function (req, res) {
+  const post = await Post.findOne({_id: req.params.id})
+  
+  res.render("edit", {
+    post
+  });
+});
+
+app.put("/posts/:id", async function (req, res) {
+  const post = await Post.findOne({_id: req.params.id})
+  post.title = req.body.title;
+  post.message = req.body.message;
+  post.save();
+
+  res.redirect(`/posts/${req.params.id}`);
+});
+
+app.delete("/posts/:id", async (req,res) => {
+  await Post.findByIdAndRemove(req.params.id);
+  res.redirect("/");
 })
 
 const port = 3000;
